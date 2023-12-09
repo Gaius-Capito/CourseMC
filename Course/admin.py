@@ -131,7 +131,8 @@ class CountryFilter(SimpleListFilter):
     parameter_name = 'teacher'
 
     def lookups(self, request, model_admin):
-        teachers = set([obj.teacher for obj in model_admin.model.objects.all()])
+        teachers = set(
+            [obj.teacher for obj in model_admin.model.objects.all()])
         return [(teacher.id, teacher.username) for teacher in teachers]
 
     def queryset(self, request, queryset):
@@ -174,7 +175,8 @@ class ClassesTimetableAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         if request.user.is_superuser:
             return ClassesTimetable.objects.all()
-        return ClassesTimetable.objects.filter(teacher__username=request.user.username)
+        return ClassesTimetable.objects.filter(
+            teacher__username=request.user.username)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "teacher":

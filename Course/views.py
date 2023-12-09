@@ -18,7 +18,8 @@ from django.views.generic.edit import FormView
 
 from Course.doc import docx_worker, save_report
 from Course.forms import StudentForm
-from Course.models import LearnGroup, Schedule, Student, StudentQuestion, ApplicationsForTraining, AdditionalLessons
+from Course.models import LearnGroup, Schedule, Student, StudentQuestion, \
+    ApplicationsForTraining, AdditionalLessons
 from Course.report import get_content_disposition, get_content_type
 from billing.models import Absences
 from reviews.models import Review
@@ -64,9 +65,16 @@ class StudentRecordView(FormView):
                 'error_message': 'Вы уже заполняли форму!',
             }
             return JsonResponse(response)
-        name = form.cleaned_data.get('name')
-        email = form.cleaned_data.get('email')
-        password = form.cleaned_data.get('password')
+        name = form.cleaned_data.get('name', '')
+        contact = form.cleaned_data.get('contact', '')
+        email = form.cleaned_data.get('email', '')
+        password = form.cleaned_data.get('password', '')
+        if '.' not in contact and '@' not in contact and '/' not in contact:
+            response = {
+                'success': False,
+                'error_message': 'Поле "Контакты" должно содержать ссылку на вашу страницу ВК/Телеграм',
+            }
+            return JsonResponse(response)
         if email.count('coursemc.ru'):
             response = {
                 'success': False,
@@ -102,7 +110,7 @@ class StudentRecordView(FormView):
         Returns:
             JsonResponse: Json ответ со статусом неудачи и пояснением.
         """
-        
+
         response = {
             'success': False,
             'error_message': 'Форма заполнена неверно!',
@@ -125,7 +133,8 @@ class StudentRecordView(FormView):
         context = super().get_context_data(**kwargs)
         ip = self.request.META.get('REMOTE_ADDR')
         context['reviews_count'] = Review.objects.all().count()
-        context['can_send_train'] = bool(ApplicationsForTraining.objects.filter(ip=ip).first())
+        context['can_send_train'] = bool(
+            ApplicationsForTraining.objects.filter(ip=ip).first())
         return context
 
 
@@ -150,7 +159,8 @@ class TimetableView(LoginRequiredMixin, ListView):
         Returns:
             Schedule: Отфильтрованный QuerySet.
         """
-        group = Student.objects.filter(name=self.request.user.username).first().groups
+        group = Student.objects.filter(
+            name=self.request.user.username).first().groups
 
         d1 = datetime.datetime.now()
         d2 = group.created_at
@@ -158,12 +168,13 @@ class TimetableView(LoginRequiredMixin, ListView):
         months = self._months(d1, d2)
         if months <= 0:
             months = 1
-        additional_lessons = AdditionalLessons.objects.filter(group=group).first()
+        additional_lessons = AdditionalLessons.objects.filter(
+            group=group).first()
         if not additional_lessons:
             additional_lessons = 0
         else:
             additional_lessons = additional_lessons.amount
-        schedules = Schedule.objects.all()[:months*22 + additional_lessons]
+        schedules = Schedule.objects.all()[:months * 22 + additional_lessons]
 
         theme = self._get_param('theme')
         if theme:
@@ -191,6 +202,9 @@ class TimetableView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['reviews_count'] = Review.objects.all().count()
         context['create_report'] = Schedule.objects.all()
+        student = Student.objects.filter(
+            name=self.request.user.username).first()
+        context['absences'] = Absences.objects.filter(user=student).count()
         return context
 
     def dispatch(self, request, *args, **kwargs):

@@ -43,3 +43,4 @@ django-colorfield==0.10.1
 python-dotenv==0.21.1
 psycopg2-binary==2.8.6
 gunicorn==20.0.4
+yookassa==2.3.5

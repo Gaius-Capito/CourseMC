@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'security.apps.SecurityConfig',
     'billing.apps.BillingConfig',
     'todolist.apps.TodolistConfig',
+    'certificate.apps.CertificateConfig',
+    'interview.apps.InterviewConfig',
 ]
 
 MIDDLEWARE = [
