@@ -1,16 +1,23 @@
-FROM python:3.9
+# Используйте официальный образ Python
+FROM python:3.8
 
-ENV PYTHONDONTWRITEBYTECODE 1
-
+# Установите переменные окружения
 ENV PYTHONUNBUFFERED 1
 
+# Создайте и перейдите в рабочий каталог
 WORKDIR /app
 
-COPY requirements.txt .
+# Установите зависимости
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip3 install -r ./requirements.txt --no-cache-dir
+# Скопируйте код в контейнер
+COPY . /app/
 
-COPY . .
+COPY .env /app/
 
-CMD ["gunicorn",  "--bind", "0:8000", "CourseMC.wsgi:application"]
+# Запустите приложение
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
 

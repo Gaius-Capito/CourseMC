@@ -9,11 +9,10 @@ from typing import Union
 
 from yookassa import Payment, Configuration
 
-from billing.config import SHOP_ID, SECRET_KEY
 from billing.models import PaymentVerification, InformationPayments
 
-Configuration.account_id = SHOP_ID
-Configuration.secret_key = SECRET_KEY
+Configuration.account_id = 1
+Configuration.secret_key = 1
 
 
 def get_payment_url(amount: int) -> tuple:
